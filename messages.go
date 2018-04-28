@@ -4,17 +4,24 @@ import (
 	"math/big"
 )
 
+type Signature struct {
+	p *big.Int
+	w *big.Int
+	o *big.Int
+	g *big.Int
+}
+
 type Message1 struct {
-	ax, ay *big.Int
-	bx, by *big.Int
+	Ax, Ay *big.Int
+	Bx, By *big.Int
 }
 
 type Message2 struct {
-	e *big.Int
+	E *big.Int
 }
 
 type Message3 struct {
-	r *big.Int
-	c *big.Int
-	s *big.Int
+	R *big.Int
+	C *big.Int
+	S *big.Int
 }

@@ -69,8 +69,8 @@ func (st *StateSigner) CreateMessage1() (Message1, error) {
 	t1x, t1y := st.curve.ScalarMult(st.info.x, st.info.y, st.d.Bytes())
 	t2x, t2y := st.curve.ScalarBaseMult(st.s.Bytes())
 
-	msg.ax, msg.ay = st.curve.ScalarBaseMult(st.u.Bytes())
-	msg.bx, msg.by = st.curve.Add(t1x, t1y, t2x, t2y)
+	msg.Ax, msg.Ay = st.curve.ScalarBaseMult(st.u.Bytes())
+	msg.Bx, msg.By = st.curve.Add(t1x, t1y, t2x, t2y)
 
 	st.state = stateSignerMsg1Created
 
@@ -82,7 +82,7 @@ func (st *StateSigner) ProcessMessage2(msg Message2) error {
 		return ErrorInvalidSignerState
 	}
 
-	st.e = msg.e
+	st.e = msg.E
 	st.state = stateSignerMsg2Processed
 	return nil
 }
@@ -106,5 +106,5 @@ func (st *StateSigner) CreateMessage3() (Message3, error) {
 
 	st.state = stateSignerMsg3Created
 
-	return Message3{r: r, c: c, s: st.s}, nil
+	return Message3{R: r, C: c, S: st.s}, nil
 }

@@ -17,13 +17,6 @@ type SecretKey struct {
 	scalar *big.Int
 }
 
-type Signature struct {
-	p *big.Int
-	w *big.Int
-	o *big.Int
-	g *big.Int
-}
-
 func (pk PublicKey) String() string {
 	return fmt.Sprintf("%s-pk: (x = %s, y = %s)", pk.curve.Params().Name, pk.x, pk.y)
 }

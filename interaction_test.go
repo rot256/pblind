@@ -98,7 +98,7 @@ func TestInteraction(t *testing.T) {
 					t.Error("failed to obtain signature:", err)
 				}
 
-				if !CheckSignature(pk, sig, info, message) {
+				if !pk.Check(sig, info, message) {
 					t.Error("failed to validate signature")
 				}
 			}

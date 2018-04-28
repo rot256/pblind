@@ -6,12 +6,7 @@ import (
 	"math/big"
 )
 
-func CheckSignature(
-	pk PublicKey,
-	sig Signature,
-	info Info,
-	msg []byte,
-) bool {
+func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 
 	curve := pk.curve
 	params := curve.Params()

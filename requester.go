@@ -71,11 +71,11 @@ func (st *StateRequester) ProcessMessage1(msg Message1) error {
 		return ErrorInvalidRequesterState
 	}
 
-	if !st.curve.IsOnCurve(msg.ax, msg.ay) {
+	if !st.curve.IsOnCurve(msg.Ax, msg.Ay) {
 		return ErrorPointNotOnCurve
 	}
 
-	if !st.curve.IsOnCurve(msg.bx, msg.by) {
+	if !st.curve.IsOnCurve(msg.Bx, msg.By) {
 		return ErrorPointNotOnCurve
 	}
 
@@ -86,7 +86,7 @@ func (st *StateRequester) ProcessMessage1(msg Message1) error {
 		alphax, alphay := func() (*big.Int, *big.Int) {
 			t1x, t1y := st.curve.ScalarBaseMult(st.t1.Bytes())
 			t2x, t2y := st.curve.ScalarMult(st.pk.x, st.pk.y, st.t2.Bytes())
-			alx, aly := st.curve.Add(msg.ax, msg.ay, t1x, t1y)
+			alx, aly := st.curve.Add(msg.Ax, msg.Ay, t1x, t1y)
 			return st.curve.Add(alx, aly, t2x, t2y)
 		}()
 
@@ -95,7 +95,7 @@ func (st *StateRequester) ProcessMessage1(msg Message1) error {
 		betax, betay := func() (*big.Int, *big.Int) {
 			t3x, t3y := st.curve.ScalarBaseMult(st.t3.Bytes())
 			t4x, t4y := st.curve.ScalarMult(st.info.x, st.info.y, st.t4.Bytes())
-			bex, bey := st.curve.Add(msg.bx, msg.by, t3x, t3y)
+			bex, bey := st.curve.Add(msg.Bx, msg.By, t3x, t3y)
 			return st.curve.Add(bex, bey, t4x, t4y)
 		}()
 
@@ -125,7 +125,7 @@ func (st *StateRequester) CreateMessage2() (Message2, error) {
 		return Message2{}, ErrorInvalidRequesterState
 	}
 	st.state = stateRequesterMsg2Created
-	return Message2{e: st.e}, nil
+	return Message2{E: st.e}, nil
 }
 
 func (st *StateRequester) ProcessMessage3(msg Message3) error {
@@ -139,21 +139,21 @@ func (st *StateRequester) ProcessMessage3(msg Message3) error {
 	// infer d
 
 	d := big.NewInt(0)
-	d.Sub(st.e, msg.c)
+	d.Sub(st.e, msg.C)
 	d.Mod(d, params.N)
 
 	// calculate signature
 
 	p := big.NewInt(0)
-	p.Add(msg.r, st.t1)
+	p.Add(msg.R, st.t1)
 	p.Mod(p, params.N)
 
 	w := big.NewInt(0)
-	w.Add(msg.c, st.t2)
+	w.Add(msg.C, st.t2)
 	w.Mod(w, params.N)
 
 	o := big.NewInt(0)
-	o.Add(msg.s, st.t3)
+	o.Add(msg.S, st.t3)
 	o.Mod(o, params.N)
 
 	g := big.NewInt(0)
@@ -167,7 +167,7 @@ func (st *StateRequester) ProcessMessage3(msg Message3) error {
 
 	// validate signature
 
-	if !CheckSignature(st.pk, st.sig, st.info, st.message) {
+	if !st.pk.Check(st.sig, st.info, st.message) {
 		return ErrorInvalidSignature
 	}
 
