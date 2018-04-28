@@ -9,29 +9,28 @@ import (
 )
 
 const (
-	stateSignerFresh       = iota
-	stateSignerMsg1Created = iota
+	stateSignerFresh = iota
+	stateSignerMsg1Created
+	stateSignerMsg2Processed
+	stateSignerMsg3Created
 )
 
 type StateSigner struct {
 	state int
 	info  Info           // shared info for exchange
 	curve elliptic.Curve // domain
-	x     *big.Int       // private key (scalar)
+	sk    SecretKey      // secret key
 	u     *big.Int       // scalar
 	s     *big.Int       // scalar
 	d     *big.Int       // scalar
 	e     *big.Int       // scalar
 }
 
-func CreateSigner(
-	sk SecretKey,
-	info Info,
-) (*StateSigner, error) {
+func CreateSigner(sk SecretKey, info Info) (*StateSigner, error) {
 
 	st := StateSigner{
 		state: stateSignerFresh,
-		x:     sk.scalar,
+		sk:    sk,
 		curve: sk.curve,
 		info:  info,
 	}
@@ -55,13 +54,17 @@ func CreateSigner(
 	return &st, nil
 }
 
-func (st *StateSigner) CreateMessage1() MessageSignerRequester1 {
+func (st *StateSigner) CreateMessage1() (Message1, error) {
+
+	var msg Message1
+
+	if st.state != stateSignerFresh {
+		return msg, ErrorInvalidSignerState
+	}
 
 	/* a = u * g
 	 * b = s * g + d * z
 	 */
-
-	var msg MessageSignerRequester1
 
 	t1x, t1y := st.curve.ScalarMult(st.info.x, st.info.y, st.d.Bytes())
 	t2x, t2y := st.curve.ScalarBaseMult(st.s.Bytes())
@@ -71,15 +74,25 @@ func (st *StateSigner) CreateMessage1() MessageSignerRequester1 {
 
 	st.state = stateSignerMsg1Created
 
-	return msg
+	return msg, nil
 }
 
-func (st *StateSigner) ProcessMessage2(msg MessageRequesterSigner2) error {
+func (st *StateSigner) ProcessMessage2(msg Message2) error {
+	if st.state != stateSignerMsg1Created {
+		return ErrorInvalidSignerState
+	}
+
 	st.e = msg.e
+	st.state = stateSignerMsg2Processed
 	return nil
 }
 
-func (st *StateSigner) CreateMessage3() MessageSignerRequester3 {
+func (st *StateSigner) CreateMessage3() (Message3, error) {
+
+	if st.state != stateSignerMsg2Processed {
+		return Message3{}, ErrorInvalidSignerState
+	}
+
 	params := st.curve.Params()
 
 	c := big.NewInt(0)
@@ -87,13 +100,11 @@ func (st *StateSigner) CreateMessage3() MessageSignerRequester3 {
 	c.Mod(c, params.N)
 
 	r := big.NewInt(0)
-	r.Mul(c, st.x)
+	r.Mul(c, st.sk.scalar)
 	r.Sub(st.u, r)
 	r.Mod(r, params.N)
 
-	return MessageSignerRequester3{
-		r: r,
-		c: c,
-		s: st.s,
-	}
+	st.state = stateSignerMsg3Created
+
+	return Message3{r: r, c: c, s: st.s}, nil
 }

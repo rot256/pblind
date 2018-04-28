@@ -2,6 +2,8 @@ package pblind
 
 import (
 	"crypto/elliptic"
+	"crypto/rand"
+	"fmt"
 	"math/big"
 )
 
@@ -20,6 +22,22 @@ type Signature struct {
 	w *big.Int
 	o *big.Int
 	g *big.Int
+}
+
+func (pk PublicKey) String() string {
+	return fmt.Sprintf("%s-pk: (x = %s, y = %s)", pk.curve.Params().Name, pk.x, pk.y)
+}
+
+func (sk SecretKey) String() string {
+	return fmt.Sprintf("%s-sk: (s = %s)", sk.curve.Params().Name, sk.scalar)
+}
+
+func NewSecretKey(curve elliptic.Curve) (SecretKey, error) {
+	var err error
+	var sk SecretKey
+	sk.curve = curve
+	sk.scalar, err = rand.Int(rand.Reader, curve.Params().N)
+	return sk, err
 }
 
 func SecretKeyFromBytes(curve elliptic.Curve, val []byte) SecretKey {

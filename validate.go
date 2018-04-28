@@ -7,13 +7,13 @@ import (
 )
 
 func CheckSignature(
-	curve elliptic.Curve,
 	pk PublicKey,
 	sig Signature,
 	info Info,
 	msg []byte,
 ) bool {
 
+	curve := pk.curve
 	params := curve.Params()
 
 	lhs := big.NewInt(0)

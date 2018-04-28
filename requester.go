@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	stateRequesterFresh       = iota
-	stateRequesterMsg1Created = iota
+	stateRequesterFresh = iota
+	stateRequesterMsg1Processed
+	stateRequesterMsg2Created
+	stateRequesterMsg3Processed
 )
 
 type StateRequester struct {
@@ -16,12 +18,14 @@ type StateRequester struct {
 	info    Info           // shared info for exchange
 	message []byte         // message to sign
 	curve   elliptic.Curve // domain
-	Yx, Yy  *big.Int       // public key
-	t1      *big.Int       // scalar
-	t2      *big.Int       // scalar
-	t3      *big.Int       // scalar
-	t4      *big.Int       // scalar
-	e       *big.Int       // scalar
+	pk      PublicKey
+	Yx, Yy  *big.Int  // public key
+	t1      *big.Int  // scalar
+	t2      *big.Int  // scalar
+	t3      *big.Int  // scalar
+	t4      *big.Int  // scalar
+	e       *big.Int  // scalar
+	sig     Signature // final signature
 }
 
 func CreateRequester(
@@ -33,8 +37,7 @@ func CreateRequester(
 	st := StateRequester{
 		state:   stateRequesterFresh,
 		info:    info,
-		Yx:      pk.x,
-		Yy:      pk.y,
+		pk:      pk,
 		curve:   pk.curve,
 		message: message,
 	}
@@ -62,7 +65,11 @@ func CreateRequester(
 	return &st, nil
 }
 
-func (st *StateRequester) ProcessMessage1(msg MessageSignerRequester1) error {
+func (st *StateRequester) ProcessMessage1(msg Message1) error {
+
+	if st.state != stateRequesterFresh {
+		return ErrorInvalidRequesterState
+	}
 
 	if !st.curve.IsOnCurve(msg.ax, msg.ay) {
 		return ErrorPointNotOnCurve
@@ -78,7 +85,7 @@ func (st *StateRequester) ProcessMessage1(msg MessageSignerRequester1) error {
 
 		alphax, alphay := func() (*big.Int, *big.Int) {
 			t1x, t1y := st.curve.ScalarBaseMult(st.t1.Bytes())
-			t2x, t2y := st.curve.ScalarMult(st.Yx, st.Yy, st.t2.Bytes())
+			t2x, t2y := st.curve.ScalarMult(st.pk.x, st.pk.y, st.t2.Bytes())
 			alx, aly := st.curve.Add(msg.ax, msg.ay, t1x, t1y)
 			return st.curve.Add(alx, aly, t2x, t2y)
 		}()
@@ -108,14 +115,24 @@ func (st *StateRequester) ProcessMessage1(msg MessageSignerRequester1) error {
 	st.e.Sub(st.e, st.t4)
 	st.e.Mod(st.e, st.curve.Params().N)
 
+	st.state = stateRequesterMsg1Processed
+
 	return nil
 }
 
-func (st *StateRequester) CreateMessage2() MessageRequesterSigner2 {
-	return MessageRequesterSigner2{e: st.e}
+func (st *StateRequester) CreateMessage2() (Message2, error) {
+	if st.state != stateRequesterMsg1Processed {
+		return Message2{}, ErrorInvalidRequesterState
+	}
+	st.state = stateRequesterMsg2Created
+	return Message2{e: st.e}, nil
 }
 
-func (st *StateRequester) ProcessMessage3(msg MessageSignerRequester3) Signature {
+func (st *StateRequester) ProcessMessage3(msg Message3) error {
+
+	if st.state != stateRequesterMsg2Created {
+		return ErrorInvalidRequesterState
+	}
 
 	params := st.curve.Params()
 
@@ -143,8 +160,27 @@ func (st *StateRequester) ProcessMessage3(msg MessageSignerRequester3) Signature
 	g.Add(d, st.t4)
 	g.Mod(g, params.N)
 
-	return Signature{
+	st.sig = Signature{
 		p: p, w: w,
 		o: o, g: g,
 	}
+
+	// validate signature
+
+	if !CheckSignature(st.pk, st.sig, st.info, st.message) {
+		return ErrorInvalidSignature
+	}
+
+	st.state = stateRequesterMsg3Processed
+
+	return nil
+}
+
+func (st *StateRequester) Signature() (Signature, error) {
+
+	if st.state != stateRequesterMsg3Processed {
+		return Signature{}, ErrorInvalidRequesterState
+	}
+
+	return st.sig, nil
 }

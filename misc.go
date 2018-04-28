@@ -5,20 +5,9 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"errors"
-	"fmt"
 	"golang.org/x/crypto/hkdf"
 	"math/big"
 )
-
-type Info struct {
-	curve elliptic.Curve
-	x     *big.Int
-	y     *big.Int
-}
-
-func (info Info) String() string {
-	return fmt.Sprintf("(%s %s)", info.x, info.y)
-}
 
 func hashToPoint(curve elliptic.Curve, value []byte) (*big.Int, *big.Int, error) {
 	params := curve.Params()
@@ -70,12 +59,6 @@ func hashToPoint(curve elliptic.Curve, value []byte) (*big.Int, *big.Int, error)
 		return x, y, nil
 	}
 
-}
-
-// TODO: find a more standized way to do this
-func CompressInfo(curve elliptic.Curve, info []byte) (c Info, err error) {
-	c.x, c.y, err = hashToPoint(curve, info)
-	return c, err
 }
 
 func hashToScalar(curve elliptic.Curve, value []byte) *big.Int {
