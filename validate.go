@@ -2,10 +2,17 @@ package pblind
 
 import (
 	"crypto/elliptic"
+	"crypto/subtle"
 	"math/big"
 )
 
-func CheckSignature(curve elliptic.Curve, pk PublicKey, sig Signature) bool {
+func CheckSignature(
+	curve elliptic.Curve,
+	pk PublicKey,
+	sig Signature,
+	info Info,
+	msg []byte,
+) bool {
 
 	params := curve.Params()
 
@@ -13,6 +20,33 @@ func CheckSignature(curve elliptic.Curve, pk PublicKey, sig Signature) bool {
 	lhs.Add(sig.w, sig.g)
 	lhs.Mod(lhs, params.N)
 
-	return false
+	hin := make([]byte, 0, 1024)
 
+	// || p*g + w*y
+
+	func() {
+		x1, y1 := curve.ScalarBaseMult(sig.p.Bytes())
+		x2, y2 := curve.ScalarMult(pk.x, pk.y, sig.w.Bytes())
+		x3, y3 := curve.Add(x1, y1, x2, y2)
+		hin = append(hin, elliptic.Marshal(curve, x3, y3)...)
+	}()
+
+	// || o*g + g*z
+
+	func() {
+		x1, y1 := curve.ScalarBaseMult(sig.o.Bytes())
+		x2, y2 := curve.ScalarMult(info.x, info.y, sig.g.Bytes())
+		x3, y3 := curve.Add(x1, y1, x2, y2)
+		hin = append(hin, elliptic.Marshal(curve, x3, y3)...)
+	}()
+
+	// || z || msg
+
+	hin = append(hin, elliptic.Marshal(curve, info.x, info.y)...)
+	hin = append(hin, msg...)
+
+	hsh := hashToScalar(curve, hin)
+	cmp := subtle.ConstantTimeCompare(lhs.Bytes(), hsh.Bytes())
+
+	return cmp == 1
 }

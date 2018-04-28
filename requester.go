@@ -25,8 +25,7 @@ type StateRequester struct {
 }
 
 func CreateRequester(
-	curve elliptic.Curve,
-	key *PublicKey,
+	pk PublicKey,
 	info Info,
 	message []byte,
 ) (*StateRequester, error) {
@@ -34,11 +33,13 @@ func CreateRequester(
 	st := StateRequester{
 		state:   stateRequesterFresh,
 		info:    info,
-		curve:   curve,
+		Yx:      pk.x,
+		Yy:      pk.y,
+		curve:   pk.curve,
 		message: message,
 	}
 
-	order := curve.Params().N
+	order := st.curve.Params().N
 
 	var err error
 
@@ -84,14 +85,11 @@ func (st *StateRequester) ProcessMessage1(msg MessageSignerRequester1) error {
 
 		// beta = b + t3 * g + t4 * z
 
-		betax := msg.bx
-		betay := msg.by
-
-		func() {
+		betax, betay := func() (*big.Int, *big.Int) {
 			t3x, t3y := st.curve.ScalarBaseMult(st.t3.Bytes())
-			t4x, t4y := st.curve.ScalarMult(st.info.x, st.info.y, st.t2.Bytes())
-			betax, betay = st.curve.Add(betax, betay, t3x, t3y)
-			betax, betay = st.curve.Add(betax, betay, t4x, t4y)
+			t4x, t4y := st.curve.ScalarMult(st.info.x, st.info.y, st.t4.Bytes())
+			bex, bey := st.curve.Add(msg.bx, msg.by, t3x, t3y)
+			return st.curve.Add(bex, bey, t4x, t4y)
 		}()
 
 		// hash to scalar
@@ -108,7 +106,7 @@ func (st *StateRequester) ProcessMessage1(msg MessageSignerRequester1) error {
 
 	st.e.Sub(st.e, st.t2)
 	st.e.Sub(st.e, st.t4)
-	st.e.Mod(st.e, st.curve.Params().P)
+	st.e.Mod(st.e, st.curve.Params().N)
 
 	return nil
 }

@@ -25,32 +25,34 @@ type StateSigner struct {
 }
 
 func CreateSigner(
-	curve elliptic.Curve,
-	sk PrivateKey,
+	sk SecretKey,
 	info Info,
 ) (*StateSigner, error) {
 
-	order := curve.Params().N
-	state := StateSigner{
+	st := StateSigner{
 		state: stateSignerFresh,
-		curve: curve,
+		x:     sk.scalar,
+		curve: sk.curve,
+		info:  info,
 	}
+
+	order := st.curve.Params().N
 
 	var err error
 
-	if state.u, err = rand.Int(rand.Reader, order); err != nil {
+	if st.u, err = rand.Int(rand.Reader, order); err != nil {
 		return nil, err
 	}
 
-	if state.s, err = rand.Int(rand.Reader, order); err != nil {
+	if st.s, err = rand.Int(rand.Reader, order); err != nil {
 		return nil, err
 	}
 
-	if state.d, err = rand.Int(rand.Reader, order); err != nil {
+	if st.d, err = rand.Int(rand.Reader, order); err != nil {
 		return nil, err
 	}
 
-	return &state, nil
+	return &st, nil
 }
 
 func (st *StateSigner) CreateMessage1() MessageSignerRequester1 {

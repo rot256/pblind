@@ -2,15 +2,18 @@ package pblind
 
 import (
 	"crypto/elliptic"
-	"fmt"
 	"math/big"
 )
 
 type PublicKey struct {
-	x, y *big.Int
+	curve elliptic.Curve
+	x, y  *big.Int
 }
 
-type PrivateKey []byte
+type SecretKey struct {
+	curve  elliptic.Curve
+	scalar *big.Int
+}
 
 type Signature struct {
 	p *big.Int
@@ -19,7 +22,21 @@ type Signature struct {
 	g *big.Int
 }
 
-func main() {
-	fmt.Println(elliptic.P256())
-	fmt.Println("vim-go")
+func SecretKeyFromBytes(curve elliptic.Curve, val []byte) SecretKey {
+	var sk SecretKey
+	sk.scalar = big.NewInt(0)
+	sk.scalar.SetBytes(val)
+	sk.curve = curve
+	return sk
+}
+
+func (sk SecretKey) Bytes() []byte {
+	return sk.scalar.Bytes()
+}
+
+func (sk SecretKey) GetPublicKey() PublicKey {
+	var pk PublicKey
+	pk.x, pk.y = sk.curve.ScalarBaseMult(sk.Bytes())
+	pk.curve = sk.curve
+	return pk
 }
