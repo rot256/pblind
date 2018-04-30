@@ -78,7 +78,8 @@ func main() {
 	sig, _ := asn1.Marshal(signature)
 	fmt.Println("encoded signature   :", len(sig), "bytes")
 
-    // check signature
+	// check signature
+
 	fmt.Println("ok:", pk.Check(signature, info, msgStr))
 }
 ```
