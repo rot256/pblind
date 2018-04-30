@@ -2,6 +2,8 @@
 
 Pblind is a small library implementing the Masayuki Abe and Tatsuaki Okamoto [scheme for partially blind signatures](https://www.iacr.org/archive/crypto2000/18800272/18800272.pdf) based on Schnorr signatures. As the underlying group pblind allows the use of all the (NIST) curves from the `crypto/elliptic`` package.
 
+**Note:** pblind is not stable, message and signature formats subject to change.
+
 ## Partially blind signatures
 
 Partially blind signatures allows a signer and a requester to construct a blind signature on a document
