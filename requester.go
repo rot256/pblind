@@ -19,7 +19,6 @@ type StateRequester struct {
 	message []byte         // message to sign
 	curve   elliptic.Curve // domain
 	pk      PublicKey
-	Yx, Yy  *big.Int  // public key
 	t1      *big.Int  // scalar
 	t2      *big.Int  // scalar
 	t3      *big.Int  // scalar
@@ -28,11 +27,7 @@ type StateRequester struct {
 	sig     Signature // final signature
 }
 
-func CreateRequester(
-	pk PublicKey,
-	info Info,
-	message []byte,
-) (*StateRequester, error) {
+func CreateRequester(pk PublicKey, info Info, message []byte) (*StateRequester, error) {
 
 	st := StateRequester{
 		state:   stateRequesterFresh,
@@ -161,8 +156,8 @@ func (st *StateRequester) ProcessMessage3(msg Message3) error {
 	g.Mod(g, params.N)
 
 	st.sig = Signature{
-		p: p, w: w,
-		o: o, g: g,
+		P: p, W: w,
+		O: o, G: g,
 	}
 
 	// validate signature

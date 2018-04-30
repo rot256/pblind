@@ -12,7 +12,7 @@ func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 	params := curve.Params()
 
 	lhs := big.NewInt(0)
-	lhs.Add(sig.w, sig.g)
+	lhs.Add(sig.W, sig.G)
 	lhs.Mod(lhs, params.N)
 
 	hin := make([]byte, 0, 1024)
@@ -20,8 +20,8 @@ func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 	// || p*g + w*y
 
 	func() {
-		x1, y1 := curve.ScalarBaseMult(sig.p.Bytes())
-		x2, y2 := curve.ScalarMult(pk.x, pk.y, sig.w.Bytes())
+		x1, y1 := curve.ScalarBaseMult(sig.P.Bytes())
+		x2, y2 := curve.ScalarMult(pk.x, pk.y, sig.W.Bytes())
 		x3, y3 := curve.Add(x1, y1, x2, y2)
 		hin = append(hin, elliptic.Marshal(curve, x3, y3)...)
 	}()
@@ -29,8 +29,8 @@ func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 	// || o*g + g*z
 
 	func() {
-		x1, y1 := curve.ScalarBaseMult(sig.o.Bytes())
-		x2, y2 := curve.ScalarMult(info.x, info.y, sig.g.Bytes())
+		x1, y1 := curve.ScalarBaseMult(sig.O.Bytes())
+		x2, y2 := curve.ScalarMult(info.x, info.y, sig.G.Bytes())
 		x3, y3 := curve.Add(x1, y1, x2, y2)
 		hin = append(hin, elliptic.Marshal(curve, x3, y3)...)
 	}()

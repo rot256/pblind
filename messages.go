@@ -5,10 +5,10 @@ import (
 )
 
 type Signature struct {
-	p *big.Int
-	w *big.Int
-	o *big.Int
-	g *big.Int
+	P *big.Int
+	W *big.Int
+	O *big.Int
+	G *big.Int
 }
 
 type Message1 struct {
