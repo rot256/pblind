@@ -1,4 +1,4 @@
-module example.com/m/v
+module github.com/rot256/pblind
 
 go 1.17
 
