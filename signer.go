@@ -62,10 +62,6 @@ func (st *StateSigner) CreateMessage1() (Message1, error) {
 		return msg, ErrorInvalidSignerState
 	}
 
-	/* a = u * g
-	 * b = s * g + d * z
-	 */
-
 	t1x, t1y := st.curve.ScalarMult(st.info.x, st.info.y, st.d.Bytes())
 	t2x, t2y := st.curve.ScalarBaseMult(st.s.Bytes())
 
@@ -81,6 +77,10 @@ func (st *StateSigner) ProcessMessage2(msg Message2) error {
 	if st.state != stateSignerMsg1Created {
 		return ErrorInvalidSignerState
 	}
+
+    if isScalarBad(st.curve.Params(), msg.E) {
+        return ErrorInvalidScalar
+    }
 
 	st.e = msg.E
 	st.state = stateSignerMsg2Processed
