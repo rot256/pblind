@@ -78,9 +78,9 @@ func (st *StateSigner) ProcessMessage2(msg Message2) error {
 		return ErrorInvalidSignerState
 	}
 
-    if isScalarBad(st.curve.Params(), msg.E) {
-        return ErrorInvalidScalar
-    }
+	if isScalarBad(st.curve.Params(), msg.E) {
+		return ErrorInvalidScalar
+	}
 
 	st.e = msg.E
 	st.state = stateSignerMsg2Processed

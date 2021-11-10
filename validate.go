@@ -11,6 +11,20 @@ func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 	curve := pk.curve
 	params := curve.Params()
 
+	// check that numbers are valid scalars
+
+	badScalar := false
+	badScalar = badScalar || isScalarBad(params, sig.P)
+	badScalar = badScalar || isScalarBad(params, sig.W)
+	badScalar = badScalar || isScalarBad(params, sig.O)
+	badScalar = badScalar || isScalarBad(params, sig.G)
+
+	if badScalar {
+		return false
+	}
+
+	// verify
+
 	lhs := big.NewInt(0)
 	lhs.Add(sig.W, sig.G)
 	lhs.Mod(lhs, params.N)

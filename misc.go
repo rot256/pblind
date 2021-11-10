@@ -10,7 +10,7 @@ import (
 )
 
 func isScalarBad(params *elliptic.CurveParams, scalar *big.Int) bool {
-    return scalar.Cmp(params.N) != -1 || scalar.Sign() == -1
+	return scalar == nil || scalar.Cmp(params.N) != -1 || scalar.Sign() == -1
 }
 
 func hashToPoint(curve elliptic.Curve, value []byte) (*big.Int, *big.Int, error) {

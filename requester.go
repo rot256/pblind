@@ -131,16 +131,16 @@ func (st *StateRequester) ProcessMessage3(msg Message3) error {
 
 	params := st.curve.Params()
 
-    // check range of scalars
+	// check range of scalars
 
-    badScalar := false
-    badScalar = badScalar || isScalarBad(params, msg.R)
-    badScalar = badScalar || isScalarBad(params, msg.C)
-    badScalar = badScalar || isScalarBad(params, msg.S)
+	badScalar := false
+	badScalar = badScalar || isScalarBad(params, msg.R)
+	badScalar = badScalar || isScalarBad(params, msg.C)
+	badScalar = badScalar || isScalarBad(params, msg.S)
 
-    if badScalar {
-        return ErrorInvalidScalar
-    }
+	if badScalar {
+		return ErrorInvalidScalar
+	}
 
 	// infer d
 
