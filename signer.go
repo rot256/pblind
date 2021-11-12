@@ -100,7 +100,7 @@ func (st *StateSigner) CreateMessage3() (Message3, error) {
 	c.Mod(c, params.N)
 
 	r := big.NewInt(0)
-	r.Mul(c, st.sk.scalar)
+	r.Mul(c, st.sk.Scalar)
 	r.Sub(st.u, r)
 	r.Mod(r, params.N)
 

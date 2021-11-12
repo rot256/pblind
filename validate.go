@@ -35,7 +35,7 @@ func (pk PublicKey) Check(sig Signature, info Info, msg []byte) bool {
 
 	func() {
 		x1, y1 := curve.ScalarBaseMult(sig.P.Bytes())
-		x2, y2 := curve.ScalarMult(pk.x, pk.y, sig.W.Bytes())
+		x2, y2 := curve.ScalarMult(pk.X, pk.Y, sig.W.Bytes())
 		x3, y3 := curve.Add(x1, y1, x2, y2)
 		hin = append(hin, elliptic.Marshal(curve, x3, y3)...)
 	}()

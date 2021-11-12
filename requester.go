@@ -80,7 +80,7 @@ func (st *StateRequester) ProcessMessage1(msg Message1) error {
 
 		alphax, alphay := func() (*big.Int, *big.Int) {
 			t1x, t1y := st.curve.ScalarBaseMult(st.t1.Bytes())
-			t2x, t2y := st.curve.ScalarMult(st.pk.x, st.pk.y, st.t2.Bytes())
+			t2x, t2y := st.curve.ScalarMult(st.pk.X, st.pk.Y, st.t2.Bytes())
 			alx, aly := st.curve.Add(msg.Ax, msg.Ay, t1x, t1y)
 			return st.curve.Add(alx, aly, t2x, t2y)
 		}()
