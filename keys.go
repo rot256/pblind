@@ -51,3 +51,20 @@ func (sk SecretKey) GetPublicKey() PublicKey {
 	pk.curve = sk.curve
 	return pk
 }
+
+func PublicKeyFromBytes(curve elliptic.Curve, val []byte) (PublicKey, error) {
+	x, y := elliptic.UnmarshalCompressed(curve, val)
+	if x == nil {
+		return PublicKey{}, ErrorInvalidPublicKey
+	}
+
+	return PublicKey{
+		curve: curve,
+		x:     x,
+		y:     y,
+	}, nil
+}
+
+func (pk PublicKey) Bytes() []byte {
+	return elliptic.MarshalCompressed(pk.curve, pk.x, pk.y)
+}

@@ -4,8 +4,11 @@ import (
 	"errors"
 )
 
-var ErrorPointNotOnCurve error = errors.New("Point not on curve")
-var ErrorInvalidSignerState error = errors.New("Signer is in invalid state")
-var ErrorInvalidRequesterState error = errors.New("Signer is in invalid state")
-var ErrorInvalidSignature error = errors.New("Signature is invalid")
-var ErrorInvalidScalar error = errors.New("Scalar is too large")
+var (
+	ErrorPointNotOnCurve       = errors.New("Point not on curve")
+	ErrorInvalidSignerState    = errors.New("Signer is in invalid state")
+	ErrorInvalidRequesterState = errors.New("Signer is in invalid state")
+	ErrorInvalidSignature      = errors.New("Signature is invalid")
+	ErrorInvalidScalar         = errors.New("Scalar is too large")
+	ErrorInvalidPublicKey      = errors.New("Public key is invalid")
+)
