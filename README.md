@@ -4,6 +4,8 @@ Pblind is a small library implementing the Masayuki Abe and Tatsuaki Okamoto [sc
 
 **Note:** pblind is not stable, message and signature formats subject to change.
 
+**Caution:** The signature scheme is not secure for concurrent sessions (multiple simultaneous clients), see the paper [On the (in)security of ROS](https://eprint.iacr.org/2020/945.pdf).
+
 ## Partially blind signatures
 
 Partially blind signatures allows a signer and a requester to construct a blind signature on a document
