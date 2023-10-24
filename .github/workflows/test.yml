@@ -1,0 +1,19 @@
+name: Go
+
+on:
+  push:
+  pull_request:
+  # once a week
+  schedule:
+    - cron: 21 2 * * MON
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+      # run test
+      - run: go test
