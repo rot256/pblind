@@ -1,4 +1,6 @@
-⚠⚠⚠ **Caution:** The Masayuki Abe and Tatsuaki Okamoto signature scheme is not secure for concurrent sessions (multiple simultaneous clients). See the paper [On the (in)security of ROS](https://eprint.iacr.org/2020/945.pdf) for more details. ⚠⚠⚠
+⚠️⚠️⚠️⚠️
+**Caution:** The Masayuki Abe and Tatsuaki Okamoto signature scheme is **not secure for concurrent sessions** (multiple simultaneous clients). 
+See the paper [On the (in)security of ROS](https://eprint.iacr.org/2020/945.pdf) from 2020 for more details. I advise to use another scheme. ⚠️⚠️⚠️⚠️
 
 # Pblind
 
